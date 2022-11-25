@@ -26,6 +26,7 @@ async function run() {
 
         const categoryCollection = client.db('carsMotor').collection('category');
         const categoryAllCollection = client.db('carsMotor').collection('allCategory');
+        const bookingCollection = client.db('carsMotor').collection('bookings');
 
         app.get('/category', async (req, res) => {
             const query = {};
@@ -40,6 +41,32 @@ async function run() {
             const category = await categoryAllCollection.find(query).toArray();
             res.send(category);
         });
+
+        app.get('/bookings', async(req, res) => {
+            const email = req.query.email;
+            const query = {loginEmail: email};
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings);
+        });
+
+
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body;
+            const query = {
+                bookingName: booking.bookingName,
+                price: booking.price,
+            }
+            const alreadyBooked = await bookingCollection.find(query).toArray();
+
+            if(alreadyBooked.length){
+                const message = `You already have a booking on ${booking.appointmentDate}`;
+                return res.send({acknowledged: false, message});
+            }
+            const result = await bookingCollection.insertOne(booking);
+            res.send(result);
+        });
+        
+        
 
 
     }

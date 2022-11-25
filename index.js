@@ -1,8 +1,9 @@
 const express = require('express');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 5000 ;
+const port = process.env.PORT || 5000;
 
 
 
@@ -13,33 +14,36 @@ app.use(express.json());
 
 
 
-// function verifyJWT(req, res, next){
-//     const authHeader = req.headers.authorization;
-//     if(!authHeader){
-//         return res.status(401).send({message: 'unauthorized access'});
-
-//     }
-//     const token = authHeader.split(' ')[1];
-//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
-//         if(err){
-//             return res.status(401).send({message: 'unauthorized access'});
-//         }
-//         req.decoded = decoded;
-//         next();
-//     })
-// }
 
 
 
-async function run(){
-    try{
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wwiopku.mongodb.net/?retryWrites=true&w=majority`;
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-        const serviceCollection = client.db('dentist').collection('services');
-        const reviewCollection = client.db('dentist').collection('reviews');
+
+async function run() {
+    try {
+
+        const categoryCollection = client.db('carsMotor').collection('category');
+        const categoryAllCollection = client.db('carsMotor').collection('allCategory');
+
+        app.get('/category', async (req, res) => {
+            const query = {};
+            const cursor = categoryCollection.find(query);
+            const category = await cursor.toArray();
+            res.send(category);
+        });
+
+        app.get('/allcategory/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {category_id: id};
+            const category = await categoryAllCollection.find(query).toArray();
+            res.send(category);
+        });
 
 
     }
-    finally{
+    finally {
 
     }
 }

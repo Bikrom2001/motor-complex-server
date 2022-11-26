@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
@@ -52,6 +52,7 @@ async function run() {
         const categoryAllCollection = client.db('carsMotor').collection('allCategory');
         const bookingCollection = client.db('carsMotor').collection('bookings');
         const usersCollection = client.db('carsMotor').collection('users');
+        const productsCollection = client.db('carsMotor').collection('products');
 
         app.get('/category', async (req, res) => {
             const query = {};
@@ -115,10 +116,15 @@ async function run() {
             res.send(users);
         });
 
+        app.get('/users/admin/:email', async(req, res) => {
+            const email = req.params.email;
+            const query = {email}
+            const user = await usersCollection.findOne(query);
+            res.send({isAdmin: user?.role === 'admin'});
+        });
 
-        app.put('/users/admin/:id',verifyJWT,  async(req, res) => {
-           
 
+        app.put('/users/admin/:id', verifyJWT, async(req, res) => {
             const id = req.params.id;
             const filter = {_id: ObjectId(id)};
             const options = {upsert: true};
@@ -137,6 +143,31 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result);
         })
+
+        app.post('/product', verifyJWT, async(req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result);
+            
+        })
+
+        // app.get('/product', verifyJWT, async(req, res) => {
+        //     const query = {};
+        //     const product = await productsCollection.find(query).toArray();
+        //     res.send(product);
+        // })
+
+        app.get('/product', verifyJWT, async(req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+            const query = {email: email};
+            const product = await productsCollection.find(query).toArray();
+            res.send(product);
+        });
         
         
 

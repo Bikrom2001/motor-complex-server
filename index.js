@@ -53,6 +53,7 @@ async function run() {
         const bookingCollection = client.db('carsMotor').collection('bookings');
         const usersCollection = client.db('carsMotor').collection('users');
         const productsCollection = client.db('carsMotor').collection('products');
+        const advertisedCollection = client.db('carsMotor').collection('advertised');
 
         app.get('/category', async (req, res) => {
             const query = {};
@@ -147,6 +148,13 @@ async function run() {
         app.post('/product', verifyJWT, async(req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
+            res.send(result);
+            
+        })
+
+        app.post('/advertised', verifyJWT, async(req, res) => {
+            const advertised = req.body;
+            const result = await productsCollection.insertOne(advertised);
             res.send(result);
             
         })

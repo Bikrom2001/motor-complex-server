@@ -154,10 +154,17 @@ async function run() {
 
         app.post('/advertised', verifyJWT, async(req, res) => {
             const advertised = req.body;
-            const result = await productsCollection.insertOne(advertised);
-            res.send(result);
+            const result = await advertisedCollection.insertOne(advertised);
+            res.send(result)
             
-        })
+        });
+
+        app.get('/advertised', verifyJWT, async(req, res) => {
+            const query = {};
+            const result = await advertisedCollection.find(query).toArray();
+            res.send(result);
+        });
+
 
         // app.get('/product', verifyJWT, async(req, res) => {
         //     const query = {};
